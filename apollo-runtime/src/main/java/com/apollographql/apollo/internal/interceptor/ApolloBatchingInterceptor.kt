@@ -17,7 +17,7 @@ class ApolloBatchingInterceptor(
 ) : ApolloInterceptor {
 
   private var queryToBatch : QueryToBatch? = null
-  
+
   override fun getInterceptorId(): Int = APOLLO_BATCHING_INTERCEPTOR
 
   override fun interceptAsync(

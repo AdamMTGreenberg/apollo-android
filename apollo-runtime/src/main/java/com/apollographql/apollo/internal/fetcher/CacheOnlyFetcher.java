@@ -25,7 +25,7 @@ public final class CacheOnlyFetcher implements ResponseFetcher {
     return new CacheOnlyInterceptor();
   }
 
-  private static final class CacheOnlyInterceptor implements ApolloInterceptor {
+  public static final class CacheOnlyInterceptor implements ApolloInterceptor {
 
     @Override public int getInterceptorId() {
       return CACHE_ONLY_INTERCEPTOR;

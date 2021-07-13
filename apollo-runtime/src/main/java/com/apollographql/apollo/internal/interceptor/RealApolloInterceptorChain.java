@@ -2,6 +2,7 @@ package com.apollographql.apollo.internal.interceptor;
 
 import com.apollographql.apollo.interceptor.ApolloInterceptor;
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain;
+import com.apollographql.apollo.interceptor.strategy.ApolloInterceptorStrategyRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,13 +34,22 @@ public final class RealApolloInterceptorChain implements ApolloInterceptorChain 
   @Override public void proceedAsync(@NotNull ApolloInterceptor.InterceptorRequest request,
       @NotNull Executor dispatcher, @NotNull ApolloInterceptor.CallBack callBack) {
     if (interceptorIndex >= interceptors.size()) throw new IllegalStateException();
-    interceptors.get(interceptorIndex).interceptAsync(request, new RealApolloInterceptorChain(interceptors,
+    getInterceptorViaStrategy(interceptors.get(interceptorIndex)).interceptAsync(request, new RealApolloInterceptorChain(interceptors,
         interceptorIndex + 1), dispatcher, callBack);
   }
 
   @Override public void dispose() {
     for (ApolloInterceptor interceptor : interceptors) {
-      interceptor.dispose();
+      getInterceptorViaStrategy(interceptor).dispose();
+    }
+  }
+
+  private ApolloInterceptor getInterceptorViaStrategy(final ApolloInterceptor interceptor) {
+    final ApolloInterceptor stub = ApolloInterceptorStrategyRegistry.INSTANCE.provideInterceptor$apollo_runtime(interceptor.getInterceptorId(), null);
+    if (stub == null ) {
+      return interceptor;
+    } else {
+      return stub;
     }
   }
 }

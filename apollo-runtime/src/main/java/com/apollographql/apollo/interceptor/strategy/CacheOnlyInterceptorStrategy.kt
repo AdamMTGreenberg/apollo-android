@@ -9,7 +9,7 @@ import com.apollographql.apollo.internal.fetcher.CacheOnlyFetcher
  */
 class CacheOnlyInterceptorStrategy : ApolloInterceptorStrategy<EmptyInterceptorParams> {
 
-  override fun newInterceptor(params: EmptyInterceptorParams): ApolloInterceptor? {
+  override fun newInterceptor(params: EmptyInterceptorParams): ApolloInterceptor {
     return CacheOnlyFetcher.CacheOnlyInterceptor()
   }
 }

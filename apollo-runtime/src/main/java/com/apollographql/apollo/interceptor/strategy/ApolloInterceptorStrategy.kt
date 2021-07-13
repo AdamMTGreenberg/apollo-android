@@ -13,5 +13,5 @@ interface ApolloInterceptorStrategy<P : ApolloInterceptorStrategyParams> {
    *
    * @return the interceptor or null if no interceptor is needed for this operation
    */
-  fun newInterceptor(params: P): ApolloInterceptor?
+  fun newInterceptor(params: P): ApolloInterceptor
 }

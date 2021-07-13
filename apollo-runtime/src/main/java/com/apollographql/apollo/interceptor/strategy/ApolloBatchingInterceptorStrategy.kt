@@ -5,7 +5,7 @@ import com.apollographql.apollo.interceptor.params.ApolloBatchingInterceptorPara
 import com.apollographql.apollo.internal.interceptor.ApolloBatchingInterceptor
 
 class ApolloBatchingInterceptorStrategy : ApolloInterceptorStrategy<ApolloBatchingInterceptorParams> {
-  override fun newInterceptor(params: ApolloBatchingInterceptorParams): ApolloInterceptor? {
+  override fun newInterceptor(params: ApolloBatchingInterceptorParams): ApolloInterceptor {
     return ApolloBatchingInterceptor(params.batcher)
   }
 }

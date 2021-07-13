@@ -9,7 +9,7 @@ import com.apollographql.apollo.internal.fetcher.NetworkFirstFetcher
  */
 class NetworkFirstInterceptorStrategy : ApolloInterceptorStrategy<LoggerInterceptorParams> {
 
-  override fun newInterceptor(params: LoggerInterceptorParams): ApolloInterceptor? {
+  override fun newInterceptor(params: LoggerInterceptorParams): ApolloInterceptor {
     return NetworkFirstFetcher.NetworkFirstInterceptor(params.logger)
   }
 }

@@ -5,7 +5,7 @@ import com.apollographql.apollo.interceptor.params.ApolloCacheInterceptorParams
 import com.apollographql.apollo.internal.interceptor.ApolloCacheInterceptor
 
 class ApolloCacheInterceptorStrategy : ApolloInterceptorStrategy<ApolloCacheInterceptorParams> {
-  override fun newInterceptor(params: ApolloCacheInterceptorParams): ApolloInterceptor? {
+  override fun newInterceptor(params: ApolloCacheInterceptorParams): ApolloInterceptor {
     return ApolloCacheInterceptor(
         params.apolloStore,
         params.responseFieldMapper,

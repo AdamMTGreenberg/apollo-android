@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.Executor;
 
+import static com.apollographql.apollo.interceptor.ApolloInterceptorIdsKt.CACHE_FIRST_INTERCEPTOR;
+
 /**
  * Signals the apollo client to first fetch the data from the normalized cache. If it's not present in the normalized
  * cache or if an exception occurs while trying to fetch it from the normalized cache, then the data is instead fetched
@@ -23,6 +25,10 @@ public final class CacheFirstFetcher implements ResponseFetcher {
   private static final class CacheFirstInterceptor implements ApolloInterceptor {
 
     volatile boolean disposed;
+
+    @Override public int getInterceptorId() {
+      return CACHE_FIRST_INTERCEPTOR;
+    }
 
     @Override
     public void interceptAsync(@NotNull final InterceptorRequest request, @NotNull final ApolloInterceptorChain chain,

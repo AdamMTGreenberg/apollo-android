@@ -11,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.Executor;
 
+import static com.apollographql.apollo.interceptor.ApolloInterceptorIdsKt.CACHE_ONLY_INTERCEPTOR;
+
 /**
  * Signals the apollo client to <b>only</b> fetch the data from the normalized cache. If it's not present in the
  * normalized cache or if an exception occurs while trying to fetch it from the normalized cache, an empty {@link
@@ -24,6 +26,10 @@ public final class CacheOnlyFetcher implements ResponseFetcher {
   }
 
   private static final class CacheOnlyInterceptor implements ApolloInterceptor {
+
+    @Override public int getInterceptorId() {
+      return CACHE_ONLY_INTERCEPTOR;
+    }
 
     @Override
     public void interceptAsync(@NotNull final InterceptorRequest request, @NotNull ApolloInterceptorChain chain,

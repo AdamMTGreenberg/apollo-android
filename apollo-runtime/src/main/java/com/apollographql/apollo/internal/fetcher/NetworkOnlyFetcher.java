@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.Executor;
 
+import static com.apollographql.apollo.interceptor.ApolloInterceptorIdsKt.NETWORK_ONLY_INTERCEPTOR;
+
 /**
  * Signals the apollo client to <b>only</b> fetch the GraphQL data from the network. If network request fails, an
  * exception is thrown.
@@ -19,6 +21,10 @@ public final class NetworkOnlyFetcher implements ResponseFetcher {
   }
 
   private static final class NetworkOnlyInterceptor implements ApolloInterceptor {
+    @Override public int getInterceptorId() {
+      return NETWORK_ONLY_INTERCEPTOR;
+    }
+
     @Override
     public void interceptAsync(@NotNull InterceptorRequest request, @NotNull ApolloInterceptorChain chain,
         @NotNull Executor dispatcher, @NotNull CallBack callBack) {

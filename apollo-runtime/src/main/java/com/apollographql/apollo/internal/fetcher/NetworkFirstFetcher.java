@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.Executor;
 
+import static com.apollographql.apollo.interceptor.ApolloInterceptorIdsKt.NETWORK_FIRST_INTERCEPTOR;
+
 /**
  * Signals the apollo client to first fetch the data from the network. If network request fails, then the data is
  * fetched from the normalized cache. If the data is not present in the normalized cache, then the exception which led
@@ -26,6 +28,10 @@ public final class NetworkFirstFetcher implements ResponseFetcher {
 
     NetworkFirstInterceptor(ApolloLogger logger) {
       this.logger = logger;
+    }
+
+    @Override public int getInterceptorId() {
+      return NETWORK_FIRST_INTERCEPTOR;
     }
 
     @Override

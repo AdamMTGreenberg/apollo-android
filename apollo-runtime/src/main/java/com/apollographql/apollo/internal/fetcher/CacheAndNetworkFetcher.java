@@ -10,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.Executor;
 
+import static com.apollographql.apollo.interceptor.ApolloInterceptorIdsKt.CACHE_AND_NETWORK_INTERCEPTOR;
+
 /**
  * Signal the apollo client to fetch the data from both the network and the cache. If cached data is not present, only
  * network data will be returned. If cached data is available, but network experiences an error, cached data is
@@ -32,6 +34,10 @@ public final class CacheAndNetworkFetcher implements ResponseFetcher {
     private boolean dispatchedCacheResult;
     private ApolloInterceptor.CallBack originalCallback;
     private volatile boolean disposed;
+
+    @Override public int getInterceptorId() {
+      return CACHE_AND_NETWORK_INTERCEPTOR;
+    }
 
     @Override
     public void interceptAsync(@NotNull InterceptorRequest request, @NotNull ApolloInterceptorChain chain,

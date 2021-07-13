@@ -20,7 +20,7 @@ public final class NetworkOnlyFetcher implements ResponseFetcher {
     return new NetworkOnlyInterceptor();
   }
 
-  private static final class NetworkOnlyInterceptor implements ApolloInterceptor {
+  public static final class NetworkOnlyInterceptor implements ApolloInterceptor {
     @Override public int getInterceptorId() {
       return NETWORK_ONLY_INTERCEPTOR;
     }

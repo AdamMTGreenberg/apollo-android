@@ -1,16 +1,14 @@
 package com.apollographql.apollo.interceptor
 
-import com.apollographql.apollo.api.Operation
-import com.apollographql.apollo.api.internal.ApolloLogger
+import com.apollographql.apollo.interceptor.params.ApolloInterceptorFactoryParams
 
-interface ApolloInterceptorFactory {
+interface ApolloInterceptorFactory<P : ApolloInterceptorFactoryParams> {
   /**
    * creates a new interceptor for the given operation
    *
-   * @param logger: a logger to output debug information
-   * @param operation: the operation
+   * @param params factory parameters for creating the [ApolloInterceptor]
    *
    * @return the interceptor or null if no interceptor is needed for this operation
    */
-  fun newInterceptor(logger: ApolloLogger, operation: Operation<*, *, *>): ApolloInterceptor?
+  fun newInterceptor(params: P): ApolloInterceptor?
 }

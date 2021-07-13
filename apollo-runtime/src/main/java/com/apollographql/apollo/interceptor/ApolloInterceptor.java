@@ -22,6 +22,14 @@ import static com.apollographql.apollo.api.internal.Utils.checkNotNull;
  * transforming the returned responses from one type to another, etc.
  */
 public interface ApolloInterceptor {
+
+  /**
+   * Obtains the unique identifier to this {@link ApolloInterceptor}'s operation. If one is attempting to override or change the default
+   * behaviour, they should override this function.
+   * @return an integer representing the identifier of the {@link ApolloInterceptor}'s operation
+   */
+  int getInterceptorId();
+
   /**
    * Intercepts the outgoing request and performs non blocking operations on the request or the response returned by the
    * next set of interceptors in the chain.

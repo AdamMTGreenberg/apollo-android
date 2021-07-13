@@ -22,7 +22,7 @@ public final class NetworkFirstFetcher implements ResponseFetcher {
     return new NetworkFirstInterceptor(logger);
   }
 
-  private static final class NetworkFirstInterceptor implements ApolloInterceptor {
+  public static final class NetworkFirstInterceptor implements ApolloInterceptor {
     volatile boolean disposed;
     final ApolloLogger logger;
 

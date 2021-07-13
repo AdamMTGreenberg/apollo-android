@@ -22,7 +22,7 @@ public final class CacheFirstFetcher implements ResponseFetcher {
     return new CacheFirstInterceptor();
   }
 
-  private static final class CacheFirstInterceptor implements ApolloInterceptor {
+  public static final class CacheFirstInterceptor implements ApolloInterceptor {
 
     volatile boolean disposed;
 

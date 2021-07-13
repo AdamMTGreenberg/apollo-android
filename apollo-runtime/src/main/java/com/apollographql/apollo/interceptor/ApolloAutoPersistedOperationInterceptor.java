@@ -9,6 +9,8 @@ import com.apollographql.apollo.api.internal.ApolloLogger;
 import com.apollographql.apollo.api.internal.Function;
 import com.apollographql.apollo.api.internal.Optional;
 import com.apollographql.apollo.exception.ApolloException;
+import com.apollographql.apollo.interceptor.params.ApolloAutoPersistedOperationInterceptorParams;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -121,7 +123,7 @@ public class ApolloAutoPersistedOperationInterceptor implements ApolloIntercepto
     return false;
   }
 
-  public static class Factory implements ApolloInterceptorFactory {
+  public static class Factory implements ApolloInterceptorFactory<ApolloAutoPersistedOperationInterceptorParams> {
 
     final boolean useHttpGet;
     final boolean persistQueries;
@@ -137,14 +139,14 @@ public class ApolloAutoPersistedOperationInterceptor implements ApolloIntercepto
       this(false, true, true);
     }
 
-    @Nullable @Override public ApolloInterceptor newInterceptor(@NotNull ApolloLogger logger, @NotNull Operation<?, ?, ?> operation) {
-      if (operation instanceof Query && !persistQueries) {
+    @Nullable @Override public ApolloInterceptor newInterceptor(@NotNull ApolloAutoPersistedOperationInterceptorParams params) {
+      if (params.operation instanceof Query && !persistQueries) {
         return null;
       }
-      if (operation instanceof Mutation && !persistMutations) {
+      if (params.operation instanceof Mutation && !persistMutations) {
         return null;
       }
-      return new ApolloAutoPersistedOperationInterceptor(logger, useHttpGet);
+      return new ApolloAutoPersistedOperationInterceptor(params.logger, useHttpGet);
     }
   }
 }

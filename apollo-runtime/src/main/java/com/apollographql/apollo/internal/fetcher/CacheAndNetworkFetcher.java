@@ -25,7 +25,7 @@ public final class CacheAndNetworkFetcher implements ResponseFetcher {
     return new CacheAndNetworkInterceptor();
   }
 
-  private static final class CacheAndNetworkInterceptor implements ApolloInterceptor {
+  public static final class CacheAndNetworkInterceptor implements ApolloInterceptor {
 
     private Optional<ApolloInterceptor.InterceptorResponse> cacheResponse = Optional.absent();
     private Optional<ApolloInterceptor.InterceptorResponse> networkResponse = Optional.absent();

@@ -11,4 +11,4 @@ data class ApolloCacheInterceptorParams(
     val dispatcher: Executor,
     val logger: ApolloLogger,
     val writeToCacheAsynchronously: Boolean
-) : ApolloInterceptorFactoryParams
+) : ApolloInterceptorStrategyParams

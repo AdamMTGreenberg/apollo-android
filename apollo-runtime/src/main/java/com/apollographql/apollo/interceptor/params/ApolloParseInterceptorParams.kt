@@ -12,4 +12,4 @@ data class ApolloParseInterceptorParams(
     val responseFieldMapper: ResponseFieldMapper,
     val scalarTypeAdapters: ScalarTypeAdapters,
     val logger: ApolloLogger
-) : ApolloInterceptorFactoryParams
+) : ApolloInterceptorStrategyParams

@@ -26,7 +26,7 @@ public final class NetworkFirstFetcher implements ResponseFetcher {
     volatile boolean disposed;
     final ApolloLogger logger;
 
-    NetworkFirstInterceptor(ApolloLogger logger) {
+    public NetworkFirstInterceptor(ApolloLogger logger) {
       this.logger = logger;
     }
 

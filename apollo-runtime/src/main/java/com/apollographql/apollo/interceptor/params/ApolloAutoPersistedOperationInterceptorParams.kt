@@ -10,4 +10,4 @@ import com.apollographql.apollo.api.internal.ApolloLogger
 data class ApolloAutoPersistedOperationInterceptorParams(
     val logger: ApolloLogger,
     val operation: Operation<*, *, *>
-) : ApolloInterceptorFactoryParams
+) : ApolloInterceptorStrategyParams

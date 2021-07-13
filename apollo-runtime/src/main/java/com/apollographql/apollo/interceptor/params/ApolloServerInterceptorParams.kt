@@ -13,4 +13,4 @@ data class ApolloServerInterceptorParams(
     val prefetch: Boolean,
     val scalarTypeAdapters: ScalarTypeAdapters,
     val logger: ApolloLogger
-) : ApolloInterceptorFactoryParams
+) : ApolloInterceptorStrategyParams

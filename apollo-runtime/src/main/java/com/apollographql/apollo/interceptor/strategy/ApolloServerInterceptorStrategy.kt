@@ -1,11 +1,10 @@
-package com.apollographql.apollo.interceptor.factory
+package com.apollographql.apollo.interceptor.strategy
 
 import com.apollographql.apollo.interceptor.ApolloInterceptor
-import com.apollographql.apollo.interceptor.ApolloInterceptorFactory
 import com.apollographql.apollo.interceptor.params.ApolloServerInterceptorParams
 import com.apollographql.apollo.internal.interceptor.ApolloServerInterceptor
 
-class ApolloServerInterceptorFactory : ApolloInterceptorFactory<ApolloServerInterceptorParams> {
+class ApolloServerInterceptorStrategy : ApolloInterceptorStrategy<ApolloServerInterceptorParams> {
   override fun newInterceptor(params: ApolloServerInterceptorParams): ApolloInterceptor? {
     return ApolloServerInterceptor(params.serverUrl, params.httpCallFactory, params.cachePolicy, params.prefetch,
         params.scalarTypeAdapters, params.logger)

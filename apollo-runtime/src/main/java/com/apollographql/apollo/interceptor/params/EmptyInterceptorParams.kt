@@ -1,3 +1,3 @@
 package com.apollographql.apollo.interceptor.params
 
-class EmptyInterceptorParams : ApolloInterceptorFactoryParams
+class EmptyInterceptorParams : ApolloInterceptorStrategyParams

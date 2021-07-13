@@ -10,6 +10,7 @@ import com.apollographql.apollo.interceptor.strategy.CacheOnlyInterceptorStrateg
 import com.apollographql.apollo.interceptor.strategy.NetworkFirstInterceptorStrategy
 import com.apollographql.apollo.interceptor.strategy.NetworkOnlyInterceptorStrategy
 import com.apollographql.apollo.interceptor.params.ApolloInterceptorStrategyParams
+import com.apollographql.apollo.interceptor.strategy.ApolloAutoPersistedOperationInterceptorStrategy
 import com.apollographql.apollo.interceptor.strategy.ApolloInterceptorStrategy
 import java.util.concurrent.ConcurrentHashMap
 
@@ -27,7 +28,7 @@ object ApolloInterceptorStrategyRegistry {
     STRATEGY_REGISTRY[APOLLO_PARSE_INTERCEPTOR] = ApolloParseInterceptorStrategy()
     STRATEGY_REGISTRY[NETWORK_ONLY_INTERCEPTOR] = NetworkOnlyInterceptorStrategy()
     STRATEGY_REGISTRY[CACHE_AND_NETWORK_INTERCEPTOR] = CacheAndNetworkInterceptorStrategy()
-    STRATEGY_REGISTRY[APOLLO_AUTO_PERSISTED_OPERATION_INTERCEPTOR] = ApolloAutoPersistedOperationInterceptor.Factory()
+    STRATEGY_REGISTRY[APOLLO_AUTO_PERSISTED_OPERATION_INTERCEPTOR] = ApolloAutoPersistedOperationInterceptorStrategy()
     STRATEGY_REGISTRY[APOLLO_CACHE_INTERCEPTOR] = ApolloCacheInterceptorStrategy()
     STRATEGY_REGISTRY[CACHE_FIRST_INTERCEPTOR] = CacheFirstInterceptorStrategy()
     STRATEGY_REGISTRY[APOLLO_SERVER_INTERCEPTOR] = ApolloServerInterceptorStrategy()
@@ -59,7 +60,7 @@ object ApolloInterceptorStrategyRegistry {
    * @param factoryId the identifier for the default [ApolloInterceptorFactory] associated with that interceptor's behavour
    * @return the [ApolloInterceptorFactory] or null if nothing associated exists
    */
-  internal fun <F: ApolloInterceptorFactory<out ApolloInterceptorStrategyParams>?> provideInterceptor(factoryId: Int): F? { // Don't love this pattern but want a concrete type and can't inline
+  internal fun <F: ApolloInterceptorStrategy<out ApolloInterceptorStrategyParams>?> provideInterceptor(factoryId: Int): F? { // Don't love this pattern but want a concrete type and can't inline
     synchronized(STRATEGY_REGISTRY) { return STRATEGY_REGISTRY[factoryId] as F? }
   }
 }

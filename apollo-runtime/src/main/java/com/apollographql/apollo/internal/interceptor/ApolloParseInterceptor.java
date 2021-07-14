@@ -13,8 +13,13 @@ import com.apollographql.apollo.interceptor.ApolloInterceptor;
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain;
 import com.apollographql.apollo.cache.normalized.internal.ResponseNormalizer;
 import com.apollographql.apollo.http.OkHttpExecutionContext;
+import com.apollographql.apollo.internal.subscription.ApolloInterceptorInfoPipeline;
 import com.apollographql.apollo.response.OperationResponseParser;
+import com.apollographql.apollo.subscription.CacheReport;
+import com.apollographql.apollo.subscription.InterceptorReport;
+
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
 import java.util.Map;
@@ -31,15 +36,18 @@ public final class ApolloParseInterceptor implements ApolloInterceptor {
   private final ResponseFieldMapper responseFieldMapper;
   private final ScalarTypeAdapters scalarTypeAdapters;
   private final ApolloLogger logger;
+  @Nullable private final ApolloInterceptorInfoPipeline pipeline;
   volatile boolean disposed;
 
   public ApolloParseInterceptor(HttpCache httpCache, ResponseNormalizer<Map<String, Object>> normalizer,
-      ResponseFieldMapper responseFieldMapper, ScalarTypeAdapters scalarTypeAdapters, ApolloLogger logger) {
+      ResponseFieldMapper responseFieldMapper, ScalarTypeAdapters scalarTypeAdapters, ApolloLogger logger,
+      @Nullable ApolloInterceptorInfoPipeline pipeline) {
     this.httpCache = httpCache;
     this.normalizer = normalizer;
     this.responseFieldMapper = responseFieldMapper;
     this.scalarTypeAdapters = scalarTypeAdapters;
     this.logger = logger;
+    this.pipeline = pipeline;
   }
 
   @Override
@@ -82,6 +90,7 @@ public final class ApolloParseInterceptor implements ApolloInterceptor {
     String cacheKey = httpResponse.request().header(HttpCache.CACHE_KEY_HEADER);
     if (httpResponse.isSuccessful()) {
       try {
+        final Long start = System.currentTimeMillis();
         final OperationResponseParser parser = new OperationResponseParser(operation, responseFieldMapper, scalarTypeAdapters, normalizer);
         final OkHttpExecutionContext httpExecutionContext = new OkHttpExecutionContext(httpResponse);
         Response parsedResponse = parser.parse(httpResponse.body().source());
@@ -90,10 +99,11 @@ public final class ApolloParseInterceptor implements ApolloInterceptor {
             .fromCache(httpResponse.cacheResponse() != null)
             .executionContext(parsedResponse.getExecutionContext().plus(httpExecutionContext))
             .build();
-
+        final Long stop = System.currentTimeMillis();
         if (parsedResponse.hasErrors() && httpCache != null) {
           httpCache.removeQuietly(cacheKey);
         }
+        report(createReport(start, stop, cacheKey, parsedResponse));
         return new InterceptorResponse(httpResponse, parsedResponse, normalizer.records());
       } catch (Exception rethrown) {
         logger.e(rethrown, "Failed to parse network response for operation: %s", operation.name().name());
@@ -107,6 +117,16 @@ public final class ApolloParseInterceptor implements ApolloInterceptor {
       logger.e("Failed to parse network response: %s", httpResponse);
       throw new ApolloHttpException(httpResponse);
     }
+  }
+
+  private void report(InterceptorReport report) {
+    if (pipeline != null) {
+      pipeline.onReport(report);
+    }
+  }
+
+  private InterceptorReport createReport(Long start, Long stop, String cacheKey, Response parsedResponse) {
+    return new CacheReport(start, stop, parsedResponse.getErrors(), parsedResponse.getData(), cacheKey);
   }
 
   private static void closeQuietly(Closeable closeable) {

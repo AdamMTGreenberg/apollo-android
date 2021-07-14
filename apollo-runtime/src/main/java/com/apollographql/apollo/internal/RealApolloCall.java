@@ -428,7 +428,7 @@ public final class RealApolloCall<T> implements ApolloQueryCall<T>, ApolloMutati
       }
     }
     interceptors.add(new ApolloParseInterceptor(httpCache, apolloStore.networkResponseNormalizer(), responseFieldMapper,
-        scalarTypeAdapters, logger));
+        scalarTypeAdapters, logger, pipeline));
 
     if (canBeBatched && batchPoller != null) {
       if (useHttpGetMethodForQueries || useHttpGetMethodForPersistedQueries) {

@@ -10,7 +10,9 @@ import com.apollographql.apollo.exception.ApolloHttpException;
 import com.apollographql.apollo.exception.ApolloNetworkException;
 import com.apollographql.apollo.exception.ApolloParseException;
 import com.apollographql.apollo.fetcher.ResponseFetcher;
+import com.apollographql.apollo.internal.subscription.ApolloInterceptorInfoPipeline;
 import com.apollographql.apollo.internal.util.Cancelable;
+import com.apollographql.apollo.subscription.InterceptorReport;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -88,6 +90,8 @@ public interface ApolloCall<T> extends Cancelable {
    * Communicates responses from a server or offline requests.
    */
   abstract class Callback<T> {
+    private static final String INSTANCE = "Callback<T>";
+    protected volatile ApolloInterceptorInfoPipeline<T> pipeline;
 
     /**
      * Gets called when GraphQL response is received and parsed successfully. Depending on the
@@ -146,6 +150,24 @@ public interface ApolloCall<T> extends Cancelable {
      */
     public void onCanceledError(@NotNull ApolloCanceledException e) {
       onFailure(e);
+    }
+
+    /**
+     * Gets called when an Interceptor has data to report back to the pipeline
+     * @param report data being sent from the {@link com.apollographql.apollo.interceptor.ApolloInterceptor}
+     */
+    public final void onInterceptorReport(@NotNull InterceptorReport report) {
+      synchronized (INSTANCE) {
+        if (this.pipeline != null) {
+          pipeline.onReport(report);
+        }
+      }
+    }
+
+    public final void setPipeline(@NotNull ApolloInterceptorInfoPipeline<T> pipeline) {
+      synchronized (INSTANCE) {
+        this.pipeline = pipeline;
+      }
     }
   }
 

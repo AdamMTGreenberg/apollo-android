@@ -1,6 +1,5 @@
 package com.apollographql.apollo.internal.subscription
 
-import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.interceptor.ApolloInterceptorInfo
 import com.apollographql.apollo.subscription.BatchingReport
 import com.apollographql.apollo.subscription.CacheReport
@@ -10,7 +9,6 @@ import com.apollographql.apollo.subscription.ServerReport
 
 class ApolloInterceptorInfoPipeline<T>(
     private var apolloInterceptorInfo: ApolloInterceptorInfo?,
-    var originalCallback: ApolloCall.Callback<T>?
 ) {
   fun onReport(report: InterceptorReport) {
     when (report) {

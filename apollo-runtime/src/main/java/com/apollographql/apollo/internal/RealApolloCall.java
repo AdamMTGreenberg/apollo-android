@@ -33,6 +33,8 @@ import com.apollographql.apollo.internal.interceptor.ApolloCacheInterceptor;
 import com.apollographql.apollo.internal.interceptor.ApolloParseInterceptor;
 import com.apollographql.apollo.internal.interceptor.ApolloServerInterceptor;
 import com.apollographql.apollo.internal.interceptor.RealApolloInterceptorChain;
+import com.apollographql.apollo.internal.subscription.ApolloInterceptorInfoPipeline;
+import com.apollographql.apollo.internal.util.AtomicReferenceUtilKt;
 import com.apollographql.apollo.request.RequestHeaders;
 import okhttp3.Call;
 import okhttp3.HttpUrl;
@@ -51,6 +53,7 @@ import static com.apollographql.apollo.internal.CallState.CANCELED;
 import static com.apollographql.apollo.internal.CallState.IDLE;
 import static com.apollographql.apollo.internal.CallState.TERMINATED;
 import static java.util.Collections.emptyList;
+import static kotlin.jvm.internal.Intrinsics.checkNotNull;
 
 @SuppressWarnings("WeakerAccess")
 public final class RealApolloCall<T> implements ApolloQueryCall<T>, ApolloMutationCall<T> {
@@ -83,7 +86,7 @@ public final class RealApolloCall<T> implements ApolloQueryCall<T>, ApolloMutati
   final boolean writeToNormalizedCacheAsynchronously;
   final boolean canBeBatched;
   final BatchPoller batchPoller;
-  @Nullable final ApolloInterceptorInfo infoCallback;
+  @Nullable final ApolloInterceptorInfoPipeline<T> pipeline;
 
   public static <T> Builder<T> builder() {
     return new Builder<>();
@@ -108,7 +111,7 @@ public final class RealApolloCall<T> implements ApolloQueryCall<T>, ApolloMutati
     refetchQueryNames = builder.refetchQueryNames;
     refetchQueries = builder.refetchQueries;
     tracker = builder.tracker;
-    infoCallback = builder.infoCallback;
+    pipeline = new ApolloInterceptorInfoPipeline<T>(builder.infoCallback);
 
     if ((refetchQueries.isEmpty() && refetchQueryNames.isEmpty()) || builder.apolloStore == null) {
       queryReFetcher = Optional.absent();
@@ -126,7 +129,6 @@ public final class RealApolloCall<T> implements ApolloQueryCall<T>, ApolloMutati
           .applicationInterceptorFactories(builder.applicationInterceptorFactories)
           .autoPersistedOperationsInterceptorFactory(builder.autoPersistedOperationsInterceptorFactory)
           .callTracker(builder.tracker)
-          // TODO .pipeline(builder.pipeline)
           .build());
     }
     useHttpGetMethodForQueries = builder.useHttpGetMethodForQueries;
@@ -204,7 +206,7 @@ public final class RealApolloCall<T> implements ApolloQueryCall<T>, ApolloMutati
           }
         } finally {
           tracker.unregisterCall(this);
-          originalCallback.set(null);
+          AtomicReferenceUtilKt.set(originalCallback,null, pipeline);
         }
         break;
       case IDLE:
@@ -342,7 +344,7 @@ public final class RealApolloCall<T> implements ApolloQueryCall<T>, ApolloMutati
   private synchronized void activate(Optional<Callback<T>> callback) {
     switch (state.get()) {
       case IDLE:
-        originalCallback.set(callback.orNull());
+        AtomicReferenceUtilKt.set(originalCallback, callback.orNull(), pipeline);
         tracker.registerCall(this);
         callback.apply(new Action<Callback<T>>() {
           @Override public void apply(@NotNull Callback<T> callback) {
@@ -365,7 +367,7 @@ public final class RealApolloCall<T> implements ApolloQueryCall<T>, ApolloMutati
     switch (state.get()) {
       case ACTIVE:
       case CANCELED:
-        return Optional.fromNullable(originalCallback.get());
+        return Optional.fromNullable(AtomicReferenceUtilKt.get(originalCallback, pipeline));
       case IDLE:
       case TERMINATED:
         throw new IllegalStateException(
@@ -380,9 +382,9 @@ public final class RealApolloCall<T> implements ApolloQueryCall<T>, ApolloMutati
       case ACTIVE:
         tracker.unregisterCall(this);
         state.set(TERMINATED);
-        return Optional.fromNullable(originalCallback.getAndSet(null));
+        return Optional.fromNullable(AtomicReferenceUtilKt.getAndSet(originalCallback, null, pipeline));
       case CANCELED:
-        return Optional.fromNullable(originalCallback.getAndSet(null));
+        return Optional.fromNullable(AtomicReferenceUtilKt.getAndSet(originalCallback, null, pipeline));
       case IDLE:
       case TERMINATED:
         throw new IllegalStateException(

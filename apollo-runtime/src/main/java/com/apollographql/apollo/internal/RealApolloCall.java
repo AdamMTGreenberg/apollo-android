@@ -26,6 +26,7 @@ import com.apollographql.apollo.interceptor.ApolloInterceptor;
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain;
 import com.apollographql.apollo.interceptor.ApolloInterceptorFactory;
 import com.apollographql.apollo.interceptor.ApolloAutoPersistedOperationInterceptor;
+import com.apollographql.apollo.interceptor.ApolloInterceptorInfo;
 import com.apollographql.apollo.internal.batch.BatchPoller;
 import com.apollographql.apollo.internal.interceptor.ApolloBatchingInterceptor;
 import com.apollographql.apollo.internal.interceptor.ApolloCacheInterceptor;
@@ -82,6 +83,7 @@ public final class RealApolloCall<T> implements ApolloQueryCall<T>, ApolloMutati
   final boolean writeToNormalizedCacheAsynchronously;
   final boolean canBeBatched;
   final BatchPoller batchPoller;
+  @Nullable final ApolloInterceptorInfo infoCallback;
 
   public static <T> Builder<T> builder() {
     return new Builder<>();
@@ -106,6 +108,7 @@ public final class RealApolloCall<T> implements ApolloQueryCall<T>, ApolloMutati
     refetchQueryNames = builder.refetchQueryNames;
     refetchQueries = builder.refetchQueries;
     tracker = builder.tracker;
+    infoCallback = builder.infoCallback;
 
     if ((refetchQueries.isEmpty() && refetchQueryNames.isEmpty()) || builder.apolloStore == null) {
       queryReFetcher = Optional.absent();
@@ -123,6 +126,7 @@ public final class RealApolloCall<T> implements ApolloQueryCall<T>, ApolloMutati
           .applicationInterceptorFactories(builder.applicationInterceptorFactories)
           .autoPersistedOperationsInterceptorFactory(builder.autoPersistedOperationsInterceptorFactory)
           .callTracker(builder.tracker)
+          // TODO .pipeline(builder.pipeline)
           .build());
     }
     useHttpGetMethodForQueries = builder.useHttpGetMethodForQueries;
@@ -330,6 +334,7 @@ public final class RealApolloCall<T> implements ApolloQueryCall<T>, ApolloMutati
         .optimisticUpdates(optimisticUpdates)
         .writeToNormalizedCacheAsynchronously(writeToNormalizedCacheAsynchronously)
         .batchPoller(batchPoller)
+        .infoCallback(infoCallback)
         .canBeBatched(canBeBatched);
   }
 
@@ -462,6 +467,7 @@ public final class RealApolloCall<T> implements ApolloQueryCall<T>, ApolloMutati
     boolean writeToNormalizedCacheAsynchronously;
     boolean canBeBatched;
     BatchPoller batchPoller;
+    ApolloInterceptorInfo infoCallback;
 
     public Builder<T> operation(Operation operation) {
       this.operation = operation;
@@ -593,6 +599,11 @@ public final class RealApolloCall<T> implements ApolloQueryCall<T>, ApolloMutati
 
     public Builder<T> batchPoller(BatchPoller batchPoller) {
       this.batchPoller = batchPoller;
+      return this;
+    }
+
+    public Builder<T> infoCallback(ApolloInterceptorInfo infoCallback) {
+      this.infoCallback = infoCallback;
       return this;
     }
 

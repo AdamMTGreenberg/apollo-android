@@ -23,6 +23,7 @@ import com.apollographql.apollo.fetcher.ApolloResponseFetchers;
 import com.apollographql.apollo.fetcher.ResponseFetcher;
 import com.apollographql.apollo.interceptor.ApolloInterceptor;
 import com.apollographql.apollo.interceptor.ApolloInterceptorFactory;
+import com.apollographql.apollo.interceptor.ApolloInterceptorInfo;
 import com.apollographql.apollo.internal.ApolloCallTracker;
 import com.apollographql.apollo.internal.RealApolloCall;
 import com.apollographql.apollo.internal.RealApolloPrefetch;
@@ -104,6 +105,7 @@ public final class ApolloClient implements ApolloQueryCall.Factory, ApolloMutati
   private final boolean writeToNormalizedCacheAsynchronously;
   private final BatchPoller batchPoller;
   private final BatchConfig batchConfig;
+  private final ApolloInterceptorInfo infoCallback;
 
   ApolloClient(HttpUrl serverUrl,
       Call.Factory httpCallFactory,
@@ -123,7 +125,8 @@ public final class ApolloClient implements ApolloQueryCall.Factory, ApolloMutati
       boolean useHttpGetMethodForQueries,
       boolean useHttpGetMethodForPersistedQueries,
       boolean writeToNormalizedCacheAsynchronously,
-      BatchConfig batchConfig) {
+      BatchConfig batchConfig,
+      ApolloInterceptorInfo infoCallback) {
     this.serverUrl = serverUrl;
     this.httpCallFactory = httpCallFactory;
     this.httpCache = httpCache;
@@ -150,6 +153,7 @@ public final class ApolloClient implements ApolloQueryCall.Factory, ApolloMutati
     this.batchPoller = batchConfig.getBatchingEnabled() ? new BatchPoller(batchConfig, dispatcher,
             new BatchHttpCallFactoryImpl(serverUrl, httpCallFactory, scalarTypeAdapters), logger,
             new PeriodicJobSchedulerImpl()) : null;
+    this.infoCallback = infoCallback;
   }
 
   @Override
@@ -415,6 +419,7 @@ public final class ApolloClient implements ApolloQueryCall.Factory, ApolloMutati
         .useHttpGetMethodForPersistedQueries(useHttpGetMethodForPersistedQueries)
         .writeToNormalizedCacheAsynchronously(writeToNormalizedCacheAsynchronously)
         .batchPoller(batchPoller)
+        .infoCallback(infoCallback)
         .build();
   }
 
@@ -449,6 +454,7 @@ public final class ApolloClient implements ApolloQueryCall.Factory, ApolloMutati
     boolean writeToNormalizedCacheAsynchronously;
     boolean enableQueryBatching;
     BatchConfig batchConfig;
+    ApolloInterceptorInfo infoCallback;
 
     Builder() {
     }
@@ -473,6 +479,7 @@ public final class ApolloClient implements ApolloQueryCall.Factory, ApolloMutati
       useHttpGetMethodForPersistedQueries = apolloClient.useHttpGetMethodForPersistedQueries;
       writeToNormalizedCacheAsynchronously = apolloClient.writeToNormalizedCacheAsynchronously;
       batchConfig = apolloClient.batchConfig;
+      infoCallback = apolloClient.infoCallback;
     }
 
     /**
@@ -779,6 +786,11 @@ public final class ApolloClient implements ApolloQueryCall.Factory, ApolloMutati
       return this;
     }
 
+    public Builder infoCallback(ApolloInterceptorInfo infoCallback) {
+      this.infoCallback = infoCallback;
+      return this;
+    }
+
     /**
      * Builds the {@link ApolloClient} instance using the configured values.
      * <p>
@@ -853,7 +865,8 @@ public final class ApolloClient implements ApolloQueryCall.Factory, ApolloMutati
           useHttpGetMethodForQueries,
           useHttpGetMethodForPersistedQueries,
           writeToNormalizedCacheAsynchronously,
-          batchConfig);
+          batchConfig,
+          infoCallback);
     }
 
     private Executor defaultDispatcher() {

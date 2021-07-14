@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.apollographql.apollo.api.internal.Utils.checkNotNull;
+import static com.apollographql.apollo.interceptor.ApolloInterceptorIdsKt.APOLLO_CACHE_INTERCEPTOR;
 
 /**
  * ApolloCacheInterceptor is a concrete {@link ApolloInterceptor} responsible for serving requests from the normalized
@@ -48,6 +49,10 @@ public final class ApolloCacheInterceptor implements ApolloInterceptor {
     this.dispatcher = checkNotNull(dispatcher, "dispatcher == null");
     this.logger = checkNotNull(logger, "logger == null");
     this.writeToCacheAsynchronously = writeToCacheAsynchronously;
+  }
+
+  @Override public int getInterceptorId() {
+    return APOLLO_CACHE_INTERCEPTOR;
   }
 
   @Override

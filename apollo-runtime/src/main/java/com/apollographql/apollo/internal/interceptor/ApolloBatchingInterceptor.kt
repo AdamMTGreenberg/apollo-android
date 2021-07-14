@@ -1,5 +1,6 @@
 package com.apollographql.apollo.internal.interceptor
 
+import com.apollographql.apollo.interceptor.APOLLO_BATCHING_INTERCEPTOR
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.apollo.internal.batch.BatchPoller
@@ -16,6 +17,8 @@ class ApolloBatchingInterceptor(
 ) : ApolloInterceptor {
 
   private var queryToBatch : QueryToBatch? = null
+
+  override fun getInterceptorId(): Int = APOLLO_BATCHING_INTERCEPTOR
 
   override fun interceptAsync(
       request: ApolloInterceptor.InterceptorRequest,

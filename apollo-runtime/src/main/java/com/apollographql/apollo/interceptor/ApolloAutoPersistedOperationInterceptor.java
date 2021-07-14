@@ -9,11 +9,14 @@ import com.apollographql.apollo.api.internal.ApolloLogger;
 import com.apollographql.apollo.api.internal.Function;
 import com.apollographql.apollo.api.internal.Optional;
 import com.apollographql.apollo.exception.ApolloException;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.Executor;
+
+import static com.apollographql.apollo.interceptor.ApolloInterceptorIdsKt.APOLLO_AUTO_PERSISTED_OPERATION_INTERCEPTOR;
 
 public class ApolloAutoPersistedOperationInterceptor implements ApolloInterceptor {
   private static final String PROTOCOL_NEGOTIATION_ERROR_QUERY_NOT_FOUND = "PersistedQueryNotFound";
@@ -28,6 +31,10 @@ public class ApolloAutoPersistedOperationInterceptor implements ApolloIntercepto
                                              boolean useHttpGetMethodForPersistedOperations) {
     this.logger = logger;
     this.useHttpGetMethodForPersistedOperations = useHttpGetMethodForPersistedOperations;
+  }
+
+  @Override public int getInterceptorId() {
+    return APOLLO_AUTO_PERSISTED_OPERATION_INTERCEPTOR;
   }
 
   @Override

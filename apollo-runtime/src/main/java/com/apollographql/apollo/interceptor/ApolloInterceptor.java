@@ -9,12 +9,14 @@ import com.apollographql.apollo.exception.ApolloException;
 import com.apollographql.apollo.request.RequestHeaders;
 
 import java.util.Collection;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 
 import org.jetbrains.annotations.NotNull;
 
 import static com.apollographql.apollo.api.internal.Utils.checkNotNull;
+import static com.apollographql.apollo.interceptor.ApolloInterceptorIdsKt.APOLLO_BATCHING_INTERCEPTOR;
 
 /**
  * ApolloInterceptor is responsible for observing and modifying the requests going out and the corresponding responses
@@ -22,6 +24,16 @@ import static com.apollographql.apollo.api.internal.Utils.checkNotNull;
  * transforming the returned responses from one type to another, etc.
  */
 public interface ApolloInterceptor {
+
+  /**
+   * Obtains the unique identifier to this {@link ApolloInterceptor}'s operation. If one is attempting to override or change the default
+   * behaviour, they should override this function.
+   * @return an integer representing the identifier of the {@link ApolloInterceptor}'s operation
+   */
+  default int getInterceptorId() {
+    return new Random().nextInt(APOLLO_BATCHING_INTERCEPTOR + 1); // begin after the last default number
+  }
+
   /**
    * Intercepts the outgoing request and performs non blocking operations on the request or the response returned by the
    * next set of interceptors in the chain.

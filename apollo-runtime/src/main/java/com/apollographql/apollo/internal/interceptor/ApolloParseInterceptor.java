@@ -20,6 +20,8 @@ import java.io.Closeable;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+import static com.apollographql.apollo.interceptor.ApolloInterceptorIdsKt.APOLLO_PARSE_INTERCEPTOR;
+
 /**
  * ApolloParseInterceptor is a concrete {@link ApolloInterceptor} responsible for inflating the http responses into
  * models. To get the http responses, it hands over the control to the next interceptor in the chain and proceeds to
@@ -40,6 +42,10 @@ public final class ApolloParseInterceptor implements ApolloInterceptor {
     this.responseFieldMapper = responseFieldMapper;
     this.scalarTypeAdapters = scalarTypeAdapters;
     this.logger = logger;
+  }
+
+  @Override public int getInterceptorId() {
+    return APOLLO_PARSE_INTERCEPTOR;
   }
 
   @Override

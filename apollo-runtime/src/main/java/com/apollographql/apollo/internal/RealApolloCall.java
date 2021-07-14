@@ -26,6 +26,7 @@ import com.apollographql.apollo.interceptor.ApolloInterceptor;
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain;
 import com.apollographql.apollo.interceptor.ApolloInterceptorFactory;
 import com.apollographql.apollo.interceptor.ApolloAutoPersistedOperationInterceptor;
+import com.apollographql.apollo.interceptor.strategy.ApolloInterceptorStrategyRegistry;
 import com.apollographql.apollo.internal.batch.BatchPoller;
 import com.apollographql.apollo.internal.interceptor.ApolloBatchingInterceptor;
 import com.apollographql.apollo.internal.interceptor.ApolloCacheInterceptor;
@@ -396,13 +397,14 @@ public final class RealApolloCall<T> implements ApolloQueryCall<T>, ApolloMutati
     for (ApolloInterceptorFactory factory : applicationInterceptorFactories) {
       ApolloInterceptor interceptor = factory.newInterceptor(logger, operation);
       if (interceptor != null) {
-        interceptors.add(interceptor);
+        addInterceptors(interceptors, interceptor);
       }
     }
     interceptors.addAll(applicationInterceptors);
+    ApolloInterceptorStrategyRegistry.INSTANCE.register$apollo_runtime(applicationInterceptors);
 
-    interceptors.add(responseFetcher.provideInterceptor(logger));
-    interceptors.add(new ApolloCacheInterceptor(
+    addInterceptors(interceptors, responseFetcher.provideInterceptor(logger));
+    addInterceptors(interceptors, new ApolloCacheInterceptor(
         apolloStore,
         responseFieldMapper,
         dispatcher,
@@ -411,29 +413,35 @@ public final class RealApolloCall<T> implements ApolloQueryCall<T>, ApolloMutati
     if (autoPersistedOperationsInterceptorFactory != null) {
       ApolloInterceptor interceptor = autoPersistedOperationsInterceptorFactory.newInterceptor(logger, operation);
       if (interceptor != null) {
-        interceptors.add(interceptor);
+        addInterceptors(interceptors, interceptor);
       }
     } else {
       if (enableAutoPersistedQueries && (operation instanceof Query || operation instanceof Mutation)) {
-        interceptors.add(new ApolloAutoPersistedOperationInterceptor(
+        final ApolloInterceptor interceptor = new ApolloAutoPersistedOperationInterceptor(
             logger,
-            useHttpGetMethodForPersistedQueries && !(operation instanceof Mutation)));
+            useHttpGetMethodForPersistedQueries && !(operation instanceof Mutation));
+        addInterceptors(interceptors, interceptor);
       }
     }
-    interceptors.add(new ApolloParseInterceptor(httpCache, apolloStore.networkResponseNormalizer(), responseFieldMapper,
+    addInterceptors(interceptors, new ApolloParseInterceptor(httpCache, apolloStore.networkResponseNormalizer(), responseFieldMapper,
         scalarTypeAdapters, logger));
 
     if (canBeBatched && batchPoller != null) {
       if (useHttpGetMethodForQueries || useHttpGetMethodForPersistedQueries) {
         throw new ApolloException("Batching is not supported when using HTTP Get method queries");
       }
-      interceptors.add(new ApolloBatchingInterceptor(batchPoller));
+      addInterceptors(interceptors, new ApolloBatchingInterceptor(batchPoller));
     } else {
-      interceptors.add(new ApolloServerInterceptor(serverUrl, httpCallFactory, httpCachePolicy, false,
+      addInterceptors(interceptors, new ApolloServerInterceptor(serverUrl, httpCallFactory, httpCachePolicy, false,
           scalarTypeAdapters, logger));
     }
 
     return new RealApolloInterceptorChain(interceptors);
+  }
+
+  private void addInterceptors(List<ApolloInterceptor> interceptors, ApolloInterceptor interceptor) {
+    interceptors.add(interceptor);
+    ApolloInterceptorStrategyRegistry.INSTANCE.register$apollo_runtime(interceptor.getInterceptorId(), interceptor);
   }
 
   public static final class Builder<T> implements ApolloQueryCall.Builder<T>, ApolloMutationCall.Builder<T> {

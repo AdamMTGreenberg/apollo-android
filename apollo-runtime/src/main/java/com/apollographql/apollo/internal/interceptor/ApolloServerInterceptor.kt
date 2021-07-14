@@ -17,6 +17,7 @@ import com.apollographql.apollo.api.internal.network.ContentType
 import com.apollographql.apollo.cache.ApolloCacheHeaders
 import com.apollographql.apollo.cache.CacheHeaders
 import com.apollographql.apollo.exception.ApolloNetworkException
+import com.apollographql.apollo.interceptor.APOLLO_SERVER_INTERCEPTOR
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptor.CallBack
 import com.apollographql.apollo.interceptor.ApolloInterceptor.FetchSourceType
@@ -60,6 +61,8 @@ class ApolloServerInterceptor(serverUrl: HttpUrl, httpCallFactory: Call.Factory,
 
   @Volatile
   var disposed = false
+
+  override fun getInterceptorId(): Int = APOLLO_SERVER_INTERCEPTOR
 
   override fun interceptAsync(request: InterceptorRequest, chain: ApolloInterceptorChain,
                               dispatcher: Executor, callBack: CallBack) {

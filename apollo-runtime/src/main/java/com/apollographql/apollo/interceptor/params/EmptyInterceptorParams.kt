@@ -1,0 +1,3 @@
+package com.apollographql.apollo.interceptor.params
+
+class EmptyInterceptorParams : ApolloInterceptorStrategyParams
